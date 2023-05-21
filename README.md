@@ -120,8 +120,8 @@ import { getChannelActivity } from "./lib/tinybird";
 const res = await getChannelActivity({
    tenantId: "1",
    channelId: "1",
-   start: 123 
-   end: 1234
+   start: 123,
+   end: 1234,
    granularity: "1h"
 })
 
