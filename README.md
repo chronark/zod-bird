@@ -3,6 +3,8 @@
     <h5>Fully typed Tinybird pipes using zod</h5>
 </div>
 
+![](https://raw.githubusercontent.com/chronark/zod-bird/main/.github/code.png)
+
 <br/>
 
 ## Install
