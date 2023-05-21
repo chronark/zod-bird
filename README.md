@@ -3,6 +3,15 @@
     <h5>Fully typed Tinybird pipes using zod</h5>
 </div>
 
+<br/>
+
+- typesafe
+- handles building the url params for you
+- easy transformation of resulting data
+- built in cache directives for nextjs
+- built in retry logic for ratelimited requests
+
+
 ```ts
 import { Tinybird } from "@chronark/zod-bird";
 
