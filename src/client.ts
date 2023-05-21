@@ -50,7 +50,7 @@ export class Tinybird {
       headers: {
         Authorization: `Bearer ${this.token}`,
       },
-      cache: opts?.cache ?? "no-store",
+      cache: opts?.cache,
       // @ts-ignore
       next: {
         revalidate: opts?.revalidate,
