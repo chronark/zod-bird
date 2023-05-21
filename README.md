@@ -3,9 +3,27 @@
     <h5>Fully typed Tinybird pipes using zod</h5>
 </div>
 
-![](https://raw.githubusercontent.com/chronark/zod-bird/main/.github/code.png)
+```ts
+import { Tinybird } from "@chronark/zod-bird";
 
-<br/>
+const tb = new Tinybird({ token: "token" });
+
+export const getEvents = tb.buildPipe({
+  pipe: "get_events__v1",
+  parameters: z.object({
+    tenantId: z.string(),
+  }),
+  data: z.object({
+    event: z.string(),
+    time: z.number().transform((t) => new Date(t)),
+  }),
+});
+
+
+const res = await getEvents({ tenantId: "chronark" })
+
+// res.data = {event: string, time: Date}[]
+```
 
 ## Install
 
