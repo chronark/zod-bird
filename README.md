@@ -2,7 +2,6 @@
     <h1 align="center">@chronark/zod-bird</h1>
     <h5>Fully typed Tinybird pipes using zod</h5>
 </div>
-![image](https://github.com/chronark/zod-bird/assets/18246773/60f144a3-a63e-4954-be7e-806950c123cc)
 
 <br/>
 
