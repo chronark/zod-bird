@@ -14,6 +14,7 @@
 
 ```ts
 import { Tinybird } from "@chronark/zod-bird";
+import { z } from "zod";
 
 const tb = new Tinybird({ token: "token" });
 
@@ -45,9 +46,8 @@ npm i @chronark/zod-bird
 
 ```ts
 // lib/tinybird.ts
-import { z } from "zod";
-
 import { Tinybird } from "./client";
+import { z } from "zod";
 
 const tb = new Tinybird({ token: process.env.TINYBIRD_TOKEN! });
 
@@ -86,9 +86,8 @@ await publishEvent({
 
 ```ts
 // lib/tinybird.ts
-import { z } from "zod";
-
 import { Tinybird } from "./client";
+import { z } from "zod";
 
 const tb = new Tinybird({ token: process.env.TINYBIRD_TOKEN! });
 
