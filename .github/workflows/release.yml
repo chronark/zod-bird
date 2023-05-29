@@ -50,6 +50,5 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_TOKEN}}" > .npmrc
 
       - name: Publish
-        working-directory: packages/sdk
         run: pnpm publish --access public --no-git-checks
 
