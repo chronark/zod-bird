@@ -25,6 +25,11 @@ const pipeResponseWithoutData = z.object({
     .optional(),
 });
 
+const eventIngestReponseData = z.object({
+  successful_rows: z.number(),
+  quarantined_rows: z.number(),
+});
+
 export class Tinybird {
   private readonly baseUrl: string;
   private readonly token: string;
@@ -71,6 +76,7 @@ export class Tinybird {
   >(req: {
     pipe: string;
     parameters?: z.ZodSchema<TParameters>;
+    // rome-ignore lint/suspicious/noExplicitAny: <explanation>
     data: z.ZodSchema<TData, any, any>;
     opts?: {
       cache?: RequestCache;
@@ -106,7 +112,7 @@ export class Tinybird {
   public buildIngestEndpoint<TEvent extends Record<string, unknown>,>(req: {
     datasource: string;
     event?: z.ZodSchema<TEvent>;
-  }): (event: TEvent) => Promise<void> {
+  }): (event: TEvent) => Promise<z.infer<typeof eventIngestReponseData>> {
     return async (event: TEvent) => {
       let validatedParams: TEvent | undefined = undefined;
       if (req.event) {
@@ -157,6 +163,14 @@ export class Tinybird {
           `Unable to ingest to ${req.datasource}: [${res.status}] ${await res.text()}`,
         );
       }
+
+      const validatedResponse = eventIngestReponseData.safeParse(await res.json());
+
+      if (!validatedResponse.success) {
+        throw new Error(validatedResponse.error.message);
+      }
+
+      return validatedResponse.data;
     };
   }
 }
