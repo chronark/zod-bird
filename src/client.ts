@@ -86,10 +86,10 @@ export class Tinybird {
       revalidate?: number;
     };
   }): (
-    params: TParameters,
+    params?: TParameters,
   ) => Promise<z.infer<typeof pipeResponseWithoutData> & { data: TData[] }> {
     const outputSchema = pipeResponseWithoutData.setKey("data", z.array(req.data));
-    return async (params: TParameters) => {
+    return async (params?: TParameters) => {
       let validatedParams: TParameters | undefined = undefined;
       if (req.parameters) {
         const v = req.parameters.safeParse(params);
