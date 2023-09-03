@@ -111,9 +111,9 @@ export class Tinybird {
 
   public buildIngestEndpoint<TEvent extends Record<string, unknown>,>(req: {
     datasource: string;
-    event?: z.ZodSchema<TEvent>;
-  }): (event: TEvent) => Promise<z.infer<typeof eventIngestReponseData>> {
-    return async (event: TEvent) => {
+    event: z.ZodSchema<TEvent>;
+  }): (events: TEvent | TEvent[]) => Promise<z.infer<typeof eventIngestReponseData>> {
+    return async (events: TEvent | TEvent[]) => {
       let validatedParams: TEvent | undefined = undefined;
       if (req.event) {
         const v = req.event.safeParse(event);
@@ -126,7 +126,7 @@ export class Tinybird {
       const url = new URL("/v0/events", this.baseUrl);
       url.searchParams.set("name", req.datasource);
 
-      const body = (Array.isArray(event) ? event : [event])
+      const body = (Array.isArray(events) ? events : [events])
         .map((p) => JSON.stringify(p))
         .join("\n");
       let res = await fetch(url, {
