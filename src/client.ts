@@ -116,7 +116,7 @@ export class Tinybird {
     return async (events: TEvent | TEvent[]) => {
       let validatedParams: TEvent | undefined = undefined;
       if (req.event) {
-        const v = req.event.safeParse(event);
+        const v = req.event.safeParse(events);
         if (!v.success) {
           throw new Error(v.error.message);
         }
