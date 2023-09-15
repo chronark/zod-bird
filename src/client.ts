@@ -114,21 +114,23 @@ export class Tinybird {
     event: z.ZodSchema<TEvent>;
   }): (events: TEvent | TEvent[]) => Promise<z.infer<typeof eventIngestReponseData>> {
     return async (events: TEvent | TEvent[]) => {
-      let validatedParams: TEvent | undefined = undefined;
+      let validatedEvents: typeof events | undefined = undefined;
       if (req.event) {
-        const v = req.event.safeParse(event);
+        const v = req.event.safeParse(events);
         if (!v.success) {
           throw new Error(v.error.message);
         }
-        validatedParams = v.data;
+        validatedEvents = v.data;
       }
 
       const url = new URL("/v0/events", this.baseUrl);
       url.searchParams.set("name", req.datasource);
 
-      const body = (Array.isArray(events) ? events : [events])
+      const body = (Array.isArray(validatedEvents) ? validatedEvents : [validatedEvents])
         .map((p) => JSON.stringify(p))
         .join("\n");
+
+      console.log("body", body);
       let res = await fetch(url, {
         method: "POST",
         body,
