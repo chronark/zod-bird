@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { Tinybird } from "./client";
 
-const tb = new Tinybird({ token: process.env.TINYBIRD_TOKEN! });
+const tb = new Tinybird({ token: "<TINYBIRD_TOKEN>" });
 
 export const getChannelActivity = tb.buildPipe({
   pipe: "get_channel_activity__v1",
@@ -75,3 +75,12 @@ export const getEvent = tb.buildPipe({
     metadata: z.string().transform((m) => JSON.parse(m)),
   }),
 });
+
+export const publishEvents = tb.buildIngestEndpoint({
+  datasource: "events__v1",
+  event: z.object({
+    id: z.string(),
+  }),
+});
+
+// await publishEvents([{ id: "1" }, { id: "2" }])

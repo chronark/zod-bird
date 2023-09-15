@@ -8,7 +8,7 @@
   "scripts": {
     "test": "node --loader=tsx --test ./**/*.test.ts ",
     "build": "tsup",
-    "fmt": "rome check --apply-unsafe ./src && rome format ."
+    "fmt": "rome check --apply-unsafe ./src && rome format . --write"
   },
   "keywords": [],
   "author": "Andreas Thomas",

@@ -80,6 +80,34 @@ await publishEvent({
 });
 ```
 
+Or multiple events in bulk, using a single request to Tinybird.
+
+```ts
+// somewhere.ts
+import { publishEvent } from "./lib/tinybird";
+
+await publishEvent([
+  {
+    id: "1",
+    tenantId: "1",
+    channelId: "1",
+    time: Date.now(),
+    event: "test",
+    content: "test",
+    metadata: JSON.stringify({ test: "test" }),
+  },
+  {
+    id: "2",
+    tenantId: "2",
+    channelId: "2",
+    time: Date.now(),
+    event: "test2",
+    content: "test2",
+    metadata: JSON.stringify({ test2: "test2" }),
+  },
+]);
+```
+
 
 
 ## Querying Endpoints
