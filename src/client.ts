@@ -116,7 +116,9 @@ export class Tinybird {
     return async (events: TEvent | TEvent[]) => {
       let validatedEvents: typeof events | undefined = undefined;
       if (req.event) {
-        const v = req.event.safeParse(events);
+        const v = Array.isArray(events)
+          ? req.event.array().safeParse(events)
+          : req.event.safeParse(events)
         if (!v.success) {
           throw new Error(v.error.message);
         }
