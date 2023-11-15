@@ -66,9 +66,6 @@ export class NoopTinybird {
         validatedEvents = v.data;
       }
 
-      const _body = (Array.isArray(validatedEvents) ? validatedEvents : [validatedEvents])
-        .map((p) => JSON.stringify(p))
-        .join("\n");
 
       const res = await this.fetch();
 
