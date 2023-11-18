@@ -54,7 +54,7 @@ export class NoopTinybird {
 
   public buildIngestEndpoint<TEvent extends Record<string, unknown>,>(req: {
     datasource: string;
-    event: z.ZodSchema<TEvent>;
+    event: z.ZodSchema<TEvent, any, any>;
   }): (events: TEvent | TEvent[]) => Promise<z.infer<typeof eventIngestReponseData>> {
     return async (events: TEvent | TEvent[]) => {
       let validatedEvents: typeof events | undefined = undefined;
@@ -65,7 +65,6 @@ export class NoopTinybird {
         }
         validatedEvents = v.data;
       }
-
 
       const res = await this.fetch();
 
