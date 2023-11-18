@@ -83,4 +83,14 @@ export const publishEvents = tb.buildIngestEndpoint({
   }),
 });
 
+export const publishTransformedEvents = tb.buildIngestEndpoint({
+  datasource: "events__v1",
+  event: z.object({
+    actor: z
+      .object({ id: z.string(), name: z.string() })
+      .transform((val) => JSON.stringify(val)),
+  }),
+});
+
 // await publishEvents([{ id: "1" }, { id: "2" }])
+// await publishTransformedEvents({ actor: { id: "1", name: "John" } });

@@ -80,12 +80,12 @@ export class Tinybird {
     };
   }
 
-  public buildIngestEndpoint<TEvent extends Record<string, unknown>,>(req: {
+  public buildIngestEndpoint<TOutput extends Record<string, unknown>, TInput = TOutput>(req: {
     datasource: string;
-    event: z.ZodSchema<TEvent, any, any>;
-  }): (events: TEvent | TEvent[]) => Promise<z.infer<typeof eventIngestReponseData>> {
-    return async (events: TEvent | TEvent[]) => {
-      let validatedEvents: typeof events | undefined = undefined;
+    event: z.ZodSchema<TOutput, z.ZodTypeDef, TInput>;
+  }): (events: TInput | TInput[]) => Promise<z.infer<typeof eventIngestReponseData>> {
+    return async (events: TInput | TInput[]) => {
+      let validatedEvents: TOutput | TOutput[] | undefined = undefined;
       if (req.event) {
         const v = Array.isArray(events)
           ? req.event.array().safeParse(events)
