@@ -42,13 +42,13 @@ export class Tinybird {
   }
 
   public buildPipe<
-    TParameters extends Record<string, unknown>,
-    TData extends Record<string, unknown>,
+    TParameters extends z.ZodSchema<any>,
+    TData extends z.ZodSchema<any>,
   >(req: {
     pipe: string;
-    parameters?: z.ZodSchema<TParameters>;
+    parameters?: TParameters;
     // rome-ignore lint/suspicious/noExplicitAny: <explanation>
-    data: z.ZodSchema<TData, any, any>;
+    data: TData;
     opts?: {
       cache?: RequestCache;
       /**
@@ -57,11 +57,11 @@ export class Tinybird {
       revalidate?: number;
     };
   }): (
-    params: TParameters,
-  ) => Promise<z.infer<typeof pipeResponseWithoutData> & { data: TData[] }> {
+    params: z.input<TParameters>,
+  ) => Promise<z.infer<typeof pipeResponseWithoutData> & { data: z.output<TData>[] }> {
     const outputSchema = pipeResponseWithoutData.setKey("data", z.array(req.data));
-    return async (params: TParameters) => {
-      let validatedParams: TParameters | undefined = undefined;
+    return async (params: z.input<TParameters>) => {
+      let validatedParams: z.input<TParameters> | undefined = undefined;
       if (req.parameters) {
         const v = req.parameters.safeParse(params);
         if (!v.success) {
@@ -80,12 +80,12 @@ export class Tinybird {
     };
   }
 
-  public buildIngestEndpoint<TOutput extends Record<string, unknown>, TInput = TOutput>(req: {
+  public buildIngestEndpoint<TSchema extends z.ZodSchema<any>>(req: {
     datasource: string;
-    event: z.ZodSchema<TOutput, z.ZodTypeDef, TInput>;
-  }): (events: TInput | TInput[]) => Promise<z.infer<typeof eventIngestReponseData>> {
-    return async (events: TInput | TInput[]) => {
-      let validatedEvents: TOutput | TOutput[] | undefined = undefined;
+    event: TSchema;
+  }): (events: z.input<TSchema> | z.input<TSchema>[]) => Promise<z.infer<typeof eventIngestReponseData>> {
+    return async (events: z.input<TSchema> | z.input<TSchema>[]) => {
+      let validatedEvents: z.output<TSchema> | z.output<TSchema>[] | undefined = undefined;
       if (req.event) {
         const v = Array.isArray(events)
           ? req.event.array().safeParse(events)
