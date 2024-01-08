@@ -8,14 +8,14 @@
   "scripts": {
     "test": "node --loader=tsx --test ./**/*.test.ts ",
     "build": "tsup",
-    "fmt": "rome check --apply-unsafe ./src && rome format . --write"
+    "fmt": "pnpm biome format . --write && pnpm biome check . --apply-unsafe "
   },
   "keywords": [],
   "author": "Andreas Thomas",
   "license": "ISC",
   "devDependencies": {
+    "@biomejs/biome": "^1.4.1",
     "@types/node": "^20.2.1",
-    "rome": "^12.1.2",
     "tsup": "^6.2.3",
     "tsx": "^3.10.1",
     "typescript": "^5.0.4"

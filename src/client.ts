@@ -1,13 +1,33 @@
-import { type PipeErrorResponse, eventIngestReponseData, pipeResponseWithoutData } from "./util";
 import { z } from "zod";
+import { type PipeErrorResponse, eventIngestReponseData, pipeResponseWithoutData } from "./util";
+
+export type Config = {
+  baseUrl?: string;
+} & (
+  | {
+      token: string;
+      noop?: never;
+    }
+  | {
+      token?: never;
+      noop: true;
+    }
+);
 
 export class Tinybird {
   private readonly baseUrl: string;
   private readonly token: string;
+  private readonly noop: boolean;
 
-  constructor(opts: { token: string; baseUrl?: string }) {
-    this.baseUrl = opts.baseUrl ?? "https://api.tinybird.co";
-    this.token = opts.token;
+  constructor(config: Config) {
+    this.baseUrl = config.baseUrl ?? "https://api.tinybird.co";
+    if (config.noop) {
+      this.token = "";
+      this.noop = true;
+    } else {
+      this.token = config.token;
+      this.noop = false;
+    }
   }
 
   private async fetch(
@@ -41,13 +61,9 @@ export class Tinybird {
     return body;
   }
 
-  public buildPipe<
-    TParameters extends z.ZodSchema<any>,
-    TData extends z.ZodSchema<any>,
-  >(req: {
+  public buildPipe<TParameters extends z.ZodSchema<any>, TData extends z.ZodSchema<any>>(req: {
     pipe: string;
     parameters?: TParameters;
-    // rome-ignore lint/suspicious/noExplicitAny: <explanation>
     data: TData;
     opts?: {
       cache?: RequestCache;
@@ -69,7 +85,9 @@ export class Tinybird {
         }
         validatedParams = v.data;
       }
-
+      if (this.noop) {
+        return { meta: [], data: [] };
+      }
       const res = await this.fetch(req.pipe, validatedParams, req.opts);
       const validatedResponse = outputSchema.safeParse(res);
       if (!validatedResponse.success) {
@@ -83,7 +101,9 @@ export class Tinybird {
   public buildIngestEndpoint<TSchema extends z.ZodSchema<any>>(req: {
     datasource: string;
     event: TSchema;
-  }): (events: z.input<TSchema> | z.input<TSchema>[]) => Promise<z.infer<typeof eventIngestReponseData>> {
+  }): (
+    events: z.input<TSchema> | z.input<TSchema>[],
+  ) => Promise<z.infer<typeof eventIngestReponseData>> {
     return async (events: z.input<TSchema> | z.input<TSchema>[]) => {
       let validatedEvents: z.output<TSchema> | z.output<TSchema>[] | undefined = undefined;
       if (req.event) {
@@ -96,6 +116,12 @@ export class Tinybird {
         validatedEvents = v.data;
       }
 
+      if (this.noop) {
+        return {
+          successful_rows: Array.isArray(validatedEvents) ? validatedEvents.length : 1,
+          quarantined_rows: 0,
+        };
+      }
       const url = new URL("/v0/events", this.baseUrl);
       url.searchParams.set("name", req.datasource);
 
