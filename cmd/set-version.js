@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const root = process.argv[2]; // path to project root
 const version = process.argv[3].replace(/^v/, ""); // new version

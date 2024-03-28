@@ -42,23 +42,32 @@ export class Tinybird {
       }
       url.searchParams.set(key, value.toString());
     }
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-      cache: opts?.cache,
-      // @ts-ignore
-      next: {
-        revalidate: opts?.revalidate,
-      },
-    });
-    if (!res.ok) {
-      const error = (await res.json()) as PipeErrorResponse;
-      throw new Error(error.error);
-    }
-    const body = await res.json();
 
-    return body;
+    for (let i = 0; i < 10; i++) {
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+        cache: opts?.cache,
+        // @ts-ignore
+        next: {
+          revalidate: opts?.revalidate,
+        },
+      });
+      if (res.ok) {
+        return res.json();
+      }
+
+      if (res.status === 429) {
+        await new Promise((r) => setTimeout(r, 1000 + i ** 2 * 50));
+        continue;
+      }
+
+      if (!res.ok) {
+        const error = (await res.json()) as PipeErrorResponse;
+        throw new Error(error.error);
+      }
+    }
   }
 
   public buildPipe<TParameters extends z.ZodSchema<any>, TData extends z.ZodSchema<any>>(req: {
@@ -129,34 +138,11 @@ export class Tinybird {
         .map((p) => JSON.stringify(p))
         .join("\n");
 
-      let res = await fetch(url, {
+      const res = await fetch(url, {
         method: "POST",
         body,
         headers: { Authorization: `Bearer ${this.token}` },
       });
-
-      /**
-       * Add one retry in case of 429 ratelimit response
-       */
-      if (res.status === 429) {
-        const limit = res.headers.get("X-RateLimit-Limit");
-        const remaining = res.headers.get("X-RateLimit-Remaining");
-        const reset = res.headers.get("X-RateLimit-Reset");
-        const retryAfter = res.headers.get("Retry-After");
-        console.warn(`Hit Tinybird ratelimit: ${url}`, {
-          limit,
-          remaining,
-          reset,
-          retryAfter,
-        });
-
-        await new Promise((r) => setTimeout(r, retryAfter ? parseInt(retryAfter) : 1000));
-        res = await fetch(url, {
-          method: "POST",
-          body,
-          headers: { Authorization: `Bearer ${this.token}` },
-        });
-      }
 
       if (!res.ok) {
         throw new Error(
