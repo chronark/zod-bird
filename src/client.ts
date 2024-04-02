@@ -31,35 +31,19 @@ export class Tinybird {
   }
 
   private async fetch(
-    pipe: string,
-    parameters: Record<string, unknown> = {},
-    opts?: { cache?: RequestCache; revalidate?: number },
+    url: string | URL,
+    opts: { method: string; headers?: Record<string, string>; body?: string },
   ): Promise<unknown> {
-    const url = new URL(`/v0/pipes/${pipe}.json`, this.baseUrl);
-    for (const [key, value] of Object.entries(parameters)) {
-      if (typeof value === "undefined" || value === null) {
-        continue;
-      }
-      url.searchParams.set(key, value.toString());
-    }
-
     for (let i = 0; i < 10; i++) {
-      const res = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-        cache: opts?.cache,
-        // @ts-ignore
-        next: {
-          revalidate: opts?.revalidate,
-        },
-      });
+      const res = await fetch(url, opts);
       if (res.ok) {
         return res.json();
       }
 
-      if (res.status === 429) {
-        await new Promise((r) => setTimeout(r, 1000 + i ** 2 * 50));
+      if (res.status === 429 || res.status >= 500) {
+        const delay = 1000 + i ** 2 * 50;
+        console.warn(`retrying ${url.toString()} in ${delay}ms`);
+        await new Promise((r) => setTimeout(r, delay));
         continue;
       }
 
@@ -97,7 +81,19 @@ export class Tinybird {
       if (this.noop) {
         return { meta: [], data: [] };
       }
-      const res = await this.fetch(req.pipe, validatedParams, req.opts);
+      const url = new URL(`/v0/pipes/${req.pipe}.json`, this.baseUrl);
+      if (validatedParams) {
+        for (const [key, value] of Object.entries(validatedParams)) {
+          if (typeof value === "undefined" || value === null) {
+            continue;
+          }
+          url.searchParams.set(key, value.toString());
+        }
+      }
+      const res = await this.fetch(url, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${this.token}` },
+      });
       const validatedResponse = outputSchema.safeParse(res);
       if (!validatedResponse.success) {
         throw new Error(validatedResponse.error.message);
@@ -138,19 +134,15 @@ export class Tinybird {
         .map((p) => JSON.stringify(p))
         .join("\n");
 
-      const res = await fetch(url, {
+      const res = await this.fetch(url, {
         method: "POST",
         body,
-        headers: { Authorization: `Bearer ${this.token}` },
+        headers: { Authorization: `Bearer ${this.token}`, "Content-Type": "application/json" },
+      }).catch((err) => {
+        throw new Error(`Unable to ingest to ${req.datasource}: ${err.message}`);
       });
 
-      if (!res.ok) {
-        throw new Error(
-          `Unable to ingest to ${req.datasource}: [${res.status}] ${await res.text()}`,
-        );
-      }
-
-      const validatedResponse = eventIngestReponseData.safeParse(await res.json());
+      const validatedResponse = eventIngestReponseData.safeParse(res);
 
       if (!validatedResponse.success) {
         throw new Error(validatedResponse.error.message);
