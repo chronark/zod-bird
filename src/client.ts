@@ -46,7 +46,6 @@ export class Tinybird {
         await new Promise((r) => setTimeout(r, delay));
         continue;
       }
-
       if (!res.ok) {
         const error = (await res.json()) as PipeErrorResponse;
         throw new Error(error.error);
