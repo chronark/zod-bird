@@ -193,6 +193,8 @@ tb.buildPipe({
     response: z.string()
   }),
    opts: {
-      revalidate: 900 ;// <-------- Add this
+      next: {
+        revalidate: 900 ;// <-------- Add this
+      }
     };
 });
