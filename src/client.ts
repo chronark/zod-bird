@@ -62,9 +62,9 @@ export class Tinybird {
       /**
        * Number of seconds to revalidate the cache
        */
-      next?:{
+      next?: {
         revalidate?: number;
-      }
+      };
     };
   }): (
     params: z.input<TParameters>,
