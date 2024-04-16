@@ -41,9 +41,7 @@ export class Tinybird {
       }
 
       if (res.status === 429 || res.status >= 500) {
-        const delay = 1000 + i ** 2 * 50;
-        console.warn(`retrying ${url.toString()} in ${delay}ms`);
-        await new Promise((r) => setTimeout(r, delay));
+        await new Promise((r) => setTimeout(r, 1000 + i ** 2 * 50));
         continue;
       }
       if (!res.ok) {
