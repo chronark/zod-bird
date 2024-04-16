@@ -32,7 +32,15 @@ export class Tinybird {
 
   private async fetch(
     url: string | URL,
-    opts: { method: string; headers?: Record<string, string>; body?: string },
+    opts: {
+      method: string;
+      headers?: Record<string, string>;
+      body?: string;
+      cache?: RequestCache;
+      next?: {
+        revalidate?: number;
+      };
+    },
   ): Promise<unknown> {
     for (let i = 0; i < 10; i++) {
       const res = await fetch(url, opts);
@@ -57,10 +65,12 @@ export class Tinybird {
     data: TData;
     opts?: {
       cache?: RequestCache;
-      /**
-       * Number of seconds to revalidate the cache
-       */
-      revalidate?: number;
+      next?: {
+        /**
+         * Number of seconds to revalidate the cache (nextjs specific)
+         */
+        revalidate?: number;
+      };
     };
   }): (
     params: z.input<TParameters>,
@@ -88,6 +98,7 @@ export class Tinybird {
         }
       }
       const res = await this.fetch(url, {
+        ...req.opts,
         method: "GET",
         headers: { Authorization: `Bearer ${this.token}` },
       });
