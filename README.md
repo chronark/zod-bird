@@ -33,6 +33,7 @@ export const getEvents = tb.buildPipe({
 const res = await getEvents({ tenantId: "chronark" })
 
 // res.data = {event: string, time: Date}[]
+// if no rows found, res.data will be an empty array
 ```
 
 ## Install
@@ -154,6 +155,22 @@ const res = await getChannelActivity({
 
 ```
 `res` is the response from the tinybird endpoint, but now fully typed and the data has been parsed according to the schema defined in `data`.
+
+## Error handling
+
+For `429` (rate limit exceeded) and `500` errors, `zod-bird` automatically retries them ([source code](https://github.com/chronark/zod-bird/blob/52944e5aebcfb547f9ccaf1e3fca03b158953e8f/src/client.ts#L45-L60)).
+
+All other errors will throw an `Exception`, so you should catch it via a try catch:
+
+```typescript
+try {
+    const res = await getEvents({ tenantId: "chronark" })
+    return res.data
+} catch (e) {
+    console.error(e)
+    return e.messsage
+}
+```
 
 ## Advanced
 
