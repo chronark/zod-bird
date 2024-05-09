@@ -114,6 +114,7 @@ export class Tinybird {
   public buildIngestEndpoint<TSchema extends z.ZodSchema<any>>(req: {
     datasource: string;
     event: TSchema;
+    wait?: boolean
   }): (
     events: z.input<TSchema> | z.input<TSchema>[],
   ) => Promise<z.infer<typeof eventIngestReponseData>> {
@@ -137,6 +138,10 @@ export class Tinybird {
       }
       const url = new URL("/v0/events", this.baseUrl);
       url.searchParams.set("name", req.datasource);
+
+      if (wait) {
+        url.searchParams.set("wait", "true");        
+      }
 
       const body = (Array.isArray(validatedEvents) ? validatedEvents : [validatedEvents])
         .map((p) => JSON.stringify(p))
