@@ -52,6 +52,11 @@ export class Tinybird {
         await new Promise((r) => setTimeout(r, 1000 + i ** 2 * 50));
         continue;
       }
+
+      if (res.status === 403) {
+        throw new Error("Unauthorized");
+      }
+
       if (!res.ok) {
         const error = (await res.json()) as PipeErrorResponse;
         throw new Error(error.error);
