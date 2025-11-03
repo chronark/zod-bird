@@ -18,9 +18,10 @@
     "@types/node": "^20.11.30",
     "tsup": "^8.0.2",
     "tsx": "^4.7.1",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "zod": "^4.1.12"
   },
-  "dependencies": {
-    "zod": "^3.22.4"
+  "peerDependencies": {
+    "zod": "^4.0.0"
   }
 }

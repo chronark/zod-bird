@@ -80,7 +80,7 @@ export class Tinybird {
   }): (
     params: z.input<TParameters>,
   ) => Promise<z.infer<typeof pipeResponseWithoutData> & { data: z.output<TData>[] }> {
-    const outputSchema = pipeResponseWithoutData.setKey("data", z.array(req.data));
+    const outputSchema = pipeResponseWithoutData.extend({ data: z.array(req.data) });
     return async (params: z.input<TParameters>) => {
       let validatedParams: z.input<TParameters> | undefined = undefined;
       if (req.parameters) {
