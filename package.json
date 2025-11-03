@@ -12,7 +12,7 @@
   },
   "keywords": [],
   "author": "Andreas Thomas",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^1.6.3",
     "@types/node": "^20.11.30",
